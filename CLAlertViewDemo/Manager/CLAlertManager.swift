@@ -25,11 +25,19 @@ class CLAlertManager: NSObject {
     public static func show(view: UIView, alertPostion: AlertPosition = .center, didCoverDismiss: Bool = false){
         contentView = view
         currentPosition = alertPostion
-        containerView = UIButton(frame: CGRect(x: 0, y: 0, width: cl_screenWidht, height: cl_screenHeight))
+        containerView = UIButton(frame: CGRect(x: 0,
+                                               y: 0,
+                                               width: cl_screenWidht,
+                                               height: cl_screenHeight))
         if didCoverDismiss {
-            containerView?.addTarget(self, action: #selector(tapView), for: .touchUpInside)
+            containerView?.addTarget(self,
+                                     action: #selector(tapView),
+                                     for: .touchUpInside)
         }
-        containerView?.backgroundColor = UIColor(red: 0.0/255, green: 0.0/255, blue: 0.0/255, alpha: 0.0)
+        containerView?.backgroundColor = UIColor(red: 0.0/255,
+                                                 green: 0.0/255,
+                                                 blue: 0.0/255,
+                                                 alpha: 0.0)
         containerView?.addSubview(view)
         view.alpha = 0
         if alertPostion == .center {
@@ -38,7 +46,7 @@ class CLAlertManager: NSObject {
             }
         }else{
             view.snp.makeConstraints { (make) in
-                make.bottom.equalTo(containerView!.snp.bottom)
+                make.top.equalTo(containerView!.snp.bottom)
                 make.leading.trailing.equalToSuperview()
             }
         }
@@ -61,44 +69,45 @@ class CLAlertManager: NSObject {
     
     private static func showCenterView(view: UIView){
         UIView.animate(withDuration: 0.25, animations: {
-            containerView?.backgroundColor = UIColor(red: 0.0/255, green: 0.0/255, blue: 0.0/255, alpha: 0.7)
+            containerView?.backgroundColor = UIColor(red: 0.0/255,
+                                                     green: 0.0/255,
+                                                     blue: 0.0/255,
+                                                     alpha: 0.4)
             view.alpha = 1.0
-        }) { (_) in
-            UIView.animate(withDuration: 0.1, delay: 0, options: .curveLinear, animations: {
-                view.transform = CGAffineTransform.init(scaleX: 0.9, y: 0.9)
-            }) { (_) in
-                UIView.animate(withDuration: 0.1, delay: 0, options: .curveLinear, animations: {
-                    view.transform = CGAffineTransform.init(scaleX: 1.1, y: 1.1)
-                }) { (_) in
-                    UIView.animate(withDuration: 0.1, delay: 0, options: .curveLinear, animations: {
-                        view.transform = CGAffineTransform.init(scaleX: 1.0, y: 1.0)
-                    }) { (_) in
-                        
-                    }
-                }
-            }
-        }
+        })
     }
     
     private static func showBottomView(view: UIView){
         view.alpha = 1.0
         view.frame.origin.y = cl_screenHeight
-        UIView.animate(withDuration: 0.25, animations: {
-            containerView?.backgroundColor = UIColor(red: 0.0/255, green: 0.0/255, blue: 0.0/255, alpha: 0.7)
-            view.frame.origin.y = cl_screenHeight - view.bounds.height
-        }) { (_) in
-            
+        view.snp.updateConstraints { (make) in
+            make.top.equalTo(containerView!.snp.bottom).offset(-view.frame.height)
         }
+        UIView.animate(withDuration: 0.25, animations: {
+            containerView?.backgroundColor = UIColor(red: 0.0/255,
+                                                     green: 0.0/255,
+                                                     blue: 0.0/255,
+                                                     alpha: 0.4)
+            containerView?.layoutIfNeeded()
+        })
     }
     
     public static func hiddenView(view: UIView = contentView ?? UIView()){
         NotificationCenter.default.removeObserver(self)
+        if currentPosition == .bottom {
+            view.snp.updateConstraints { (make) in
+                make.top.equalTo(containerView!.snp.bottom)
+            }
+        }
         UIView.animate(withDuration: 0.25, animations: {
-            containerView?.backgroundColor = UIColor(red: 255.0/255, green: 255.0/255, blue: 255.0/255, alpha: 0.0)
+            containerView?.backgroundColor = UIColor(red: 255.0/255,
+                                                     green: 255.0/255,
+                                                     blue: 255.0/255,
+                                                     alpha: 0.0)
             if currentPosition == .center {
                 containerView?.alpha = 0.0
             }else{
-                view.frame.origin.y = cl_screenHeight
+                containerView?.layoutIfNeeded()
             }
         }) { (_) in
             vc?.dismiss(animated: false, completion: nil)
